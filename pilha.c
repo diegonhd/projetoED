@@ -173,62 +173,6 @@ void Fila_dump(TFila *fila){
     }
 }
 
-int main()
-{
-    TFila  fila;
-    int a,i;
-    bool result;
-   
-    Fila_create(&fila, sizeof(int), 5, TYPE_PILHA);
-
-    printf("Teste Basico\n");
-   
-    a=1;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-   
-    a=2;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-   
-    a=3;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-
-    a=4;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-
-    a=5;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-
-    result = Fila_get(&fila,&a);
-    printf("data =%d\n",a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-
-
-    a=6;
-    result = Fila_put(&fila,&a);
-    printf("Resultado = %s\n",result ? "true" : "false");
-    Fila_dump(&fila);
-   
-    for(i=0;i<fila.maxElement;i++){
-        result = Fila_get(&fila,&a);
-        printf("data =%d\n",a);
-        printf("Resultado = %s\n",result ? "true" : "false");
-        Fila_dump(&fila);
-    }
-
-   
-   
-    Fila_destroy(&fila);
-
+int main(){
     return 0;
 }
