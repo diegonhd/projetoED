@@ -3,176 +3,490 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TYPE_PILHA 1
-#define TYPE_FILA 2
+typedef unsigned char byte;
 
-typedef struct tagFila {
-    int        type;// tipo da estrutura Pilha ou Fila
-    char    *buffer;// Buffer para guardar os elementos
-    char     *first;// ponteiro para primeiro elemento
-    char      *last;// ponteiro para ultimo
-    int        size;// tamanho da fila
-    int sizeElement;// tamanho do elemento da fila
-    int  maxElement;// numero maximo de elementos
-} TFila;
+typedef struct tagElementoLista {
+    byte *data;// ponteiro para o dado a ser armazenado na lista
+    void *nextElemento;// ponteiro para o proximo elemento da lista;
+    void *prevElemento;// ponteiro para o elemento anterior da lista;
+} TElementoLista;
 
-bool Fila_create(TFila *fila, int sizeElement, int max, int type);
-void Fila_destroy(TFila *fila);
-bool Fila_put(TFila *fila,char *data);
-bool Fila_get(TFila *fila,char *data);
-bool Fila_isEmpty(TFila *fila);
-bool Fila_isFull(TFila *fila);
-int Fila_size(TFila *fila);
+typedef struct tagLista {
+    bool isCircular;// indica se a lista e circular
+    bool isDoubleChain;// indica se a lista é duplamente encadeada
+    int nElementos; // numero de elementos da lista
+    int sizeElemento;// tamanho do elemento da lista
+    TElementoLista *first;// ponteiro para o primeiro elemento da lista
+    TElementoLista *last;// ponteiro para ultimo elemento da lista
+    TElementoLista *current;// ponteiro para ultimo elemento da lista
+} TLista;
 
-bool Fila_create(TFila *fila, int sizeElement, int max, int type)
-{
-    // verifica se paramentros da funçao sao validos
-    if(fila == NULL){
-        return false;
-    }
-    if((sizeElement==0)||(max==0)){
-        return false;
-    }
-    // aloca area para a fila
-    if( (fila->buffer = malloc(sizeElement *max))==NULL){
-        return false;
-    }
-    // inicializa propriedades da fila
-    fila->size = 0;
-    fila->sizeElement = sizeElement;
-    fila->maxElement = max;
-    fila->first = fila->buffer;
-    fila->last  = fila->buffer;
-    fila->size = 0;
-    fila->type = type;
-   
-    return true;
+// metodos de acesso do objeto lista
+
+void Lista_cria(TLista *lista,int sizeElemento,bool isCircular,bool isDoubleChain);
+void Lista_destroi(TLista *lista);
+byte *Lista_first(TLista *lista);
+void Lista_next(TLista *lista);
+void Lista_prev(TLista *lista);
+byte *Lista_last(TLista *lista);
+bool Lista_inserir(TLista *lista, byte *data);
+bool Lista_removeCorrente(TLista *lista);
+bool Lista_removeUltimo(TLista *lista);
+void Lista_goFirst(TLista *lista);
+void Lista_goLast(TLista *lista);
+
+TElementoLista *List_getCurrentItem(TLista *lista);
+
+void mostra_ElementosPrevLista(TLista *lista, int numero);
+void mostra_ElementosLista(TLista *lista, int numero);
+
+
+
+void Lista_cria(TLista *lista,int sizeElemento,bool isCircular, bool isDoubleChain){
+    lista->isCircular = isCircular;
+    lista->isDoubleChain = isDoubleChain;
+    lista->nElementos = 0;
+    lista->sizeElemento = sizeElemento;
+    lista->first = NULL;// ponteiro para o primeiro elemento da lista
+    lista->last  = NULL;// ponteiro para ultimo elemento da lista
+    lista->current = NULL;
 }
-
-void Fila_destroy(TFila *fila){
-    // libera a area da fila
-    free(fila->buffer);
-    // zera propriedades
-    fila->size = 0;
-    fila->sizeElement = 0;
-    fila->maxElement = 0;
-    fila->first = NULL;
-    fila->last  = NULL;
-    fila->size = 0;
-}
-   
-
-bool Fila_put(TFila *fila,char *data){
-    if(data == NULL){
-        return false;
-    }
-    if(Fila_isFull(fila)==false){
-        // copia o dado para a Fila
-        memcpy(fila->last,data,fila->sizeElement);
-        // incremento o ponteiro do ultimo
-        if (fila->size < fila->maxElement){
-            // Incrementa ponteiro
-            fila->last += fila->sizeElement;
-            // checa se nao deve circular o ponteiro
-            if(fila->type == TYPE_FILA){
-                if(fila->last >= fila->buffer + fila->maxElement*fila->sizeElement)
-                   fila->last = fila->buffer;
-            }
-           
-            // increnta o numero de elementos na fila
-            fila->size++;
-            return true;
+void Lista_destroi(TLista *lista){
+    int i,n;
+    if (lista->nElementos != 0){
+        n = lista->nElementos;
+        Lista_goLast(lista);
+        for( i =0; i< n;i++){
+            Lista_removeUltimo(lista);
         }
     }
-    return false;
-   
+    lista->nElementos = 0;
+    lista->sizeElemento = 0;
+    lista->first = NULL;// ponteiro para o primeiro elemento da lista
+    lista->last  = NULL;// ponteiro para ultimo elemento da lista
+    lista->current = NULL;
 }
-bool Fila_get(TFila *fila,char *data){
 
-    if(data == NULL){
-        return false;
+byte *Lista_first(TLista *lista){
+    lista->current = lista->first;
+    return lista->first->data;
+}
+void Lista_next(TLista *lista){
+    if(lista->current->nextElemento != NULL){
+        lista->current = lista->current->nextElemento;
     }
-    if (fila->type == TYPE_PILHA){  
-        if(Fila_isEmpty(fila)==false){
-            // Decrementa o ponteiro do ultimo
-            if (fila->size > 0){
-                // decrementa o last
-                fila->last -= fila->sizeElement;
-                memcpy(data,fila->last, fila->sizeElement);
-                // decrementa o numero de elementos na fila
-                fila->size--;
-                return true;
-            }
-            else{
-                return false;
+}
+void Lista_prev(TLista *lista){
+    if(lista->isDoubleChain){
+        if(lista->current->prevElemento != NULL){
+            lista->current = lista->current->prevElemento;
+        }
+    }
+}
+byte *Lista_last(TLista *lista){
+    return lista->last->data;
+}
+
+bool Lista_inserir(TLista *lista, byte *data){
+    TElementoLista *item;
+    if(data !=NULL){
+        // testa se é o primeiro elemento
+        if(lista->nElementos == 0){
+            // aloca area para o elemento da lista
+            if( (item = malloc(sizeof(TElementoLista)))!= NULL){
+                // aloca area para o dado
+                if((item->data = malloc(lista->sizeElemento))!=NULL){
+                    // copia o dado
+                    memcpy(item->data,data, lista->sizeElemento);
+                    // seta NULL para o proximo elemento pois a lista tem um so elemento no caso de lista simples
+                    // e o proprio elemento no caso de lista circular
+                    item->nextElemento = lista->isCircular ? item:NULL;
+                    if (lista->isDoubleChain){
+                        // seta NULL para o proximo elemento pois a lista tem um so elemento
+                        item->prevElemento = lista->isCircular ? item:NULL;
+                    }
+                    else{
+                        item->prevElemento = NULL;
+                    }
+                    // atualiza os ponteiros da lista
+                    lista->first = item;
+                    lista->current = item;
+                    lista->last = item;
+                    lista->nElementos++;
+                }
             }
         }
+        else{
+            // aloca area para o elemento da lista
+            if( (item = malloc(sizeof(TElementoLista)))!= NULL){
+                // atualiza o ponteiro do proximo elemento do ultimo anterior para ser novo elemento
+                lista->last->nextElemento = item;
+                if(lista->nElementos == 1){
+                    lista->first->nextElemento = item;
+                    if (lista->isDoubleChain == true){
+                        lista->first->prevElemento = lista->isCircular ? item:NULL;
+                    }
+                    else{
+                        lista->first->prevElemento = NULL;
+                    }
+                }
+                else {
+                    lista->current->nextElemento = item;
+                }
+                // aloca area para o dado
+                if((item->data = malloc(lista->sizeElemento))!=NULL){
+                    // copia o dado
+                    memcpy(item->data,data, lista->sizeElemento);
+                    // seta NULL para o proximo elemento pois a lista tem um so elemento
+                    item->nextElemento = lista->isCircular ? lista->first:NULL;
+                    if (lista->isDoubleChain){
+                        // seta NULL para o elemento anterior pois a lista tem um so elemento
+                        item->prevElemento = lista->current;
+                        lista->first->prevElemento = lista->isCircular?item:NULL;
+                    }
+                    else{
+                        item->prevElemento = NULL;
+                    }
+                    // atualiza os ponteiros da lista
+                    lista->current = item;
+                    lista->last = item;
+                    lista->nElementos++;
+                }
+            }
+        }
+       
+       
+    }
+}
+void TElementoLista_dump(TElementoLista *element, int size){
+    int i;
+    byte *point;
+    printf ("data = %x\n", element->data);
+    printf ("next = %x\n",element->nextElemento);
+    printf ("prev = %x\n",element->prevElemento);
+    printf("Conteudo data\n");
+    point = (byte*)(element->data);
+    for (i = 0; i< size;i++){
+        printf("%04x : %02x : %03d : %c \n",point, (*point), (*point), (*point));
+        point++;
+    }
+}
+void Lista_dumpParam(TLista *lista){
+    TElementoLista *item;
+    int i;
+   
+    printf("n.elementos      = %d\n",lista->nElementos); // numero de elementos da lista
+    printf("Tamanho elem     = %d\n",lista->sizeElemento);// tamanho do elemento da lista
+    printf("Ponteiro first   = %x\n", lista->first);// ponteiro para o primeiro elemento da lista
+    printf("Ponteiro last    = %x\n",lista->last);// ponteiro para ultimo elemento da lista
+    printf("Ponteiro current = %x\n",lista->current);// ponteiro para ultimo elemento da lista
+    if(lista->first != NULL){
+        item = lista->first;
+        i = 0;
+        do{
+            TElementoLista_dump(item,lista->sizeElemento);
+            item = item->nextElemento;
+            i++;
+        }
+        while(i <lista->nElementos);
+    }
+    printf("-----------------------------------\n");
+   
+}
+
+TElementoLista *Lista_getPenultimo(TLista *lista){
+    TElementoLista *point;
+
+    point = NULL;
+    if(lista->nElementos > 0){  
+        // atribuo ao primeiro elemento da lista
+        point=lista->first;
+        // Percorro a lista ate que seja o penultimo elemento, isto e,
+        // o proximo e o ultimo elemento da lista
+        while (point->nextElemento != lista->last){
+            point = point->nextElemento;
+        }
+    }
+    return point;
+}
+
+TElementoLista *Lista_getAnterior(TLista *lista){
+    TElementoLista *point;
+
+    point = NULL;
+    if(lista->nElementos > 0){  
+        // atribuo ao primeiro elemento da lista
+        point=lista->first;
+        // Percorro a lista ate que seja o penultimo elemento, isto e,
+        // o proximo e o ultimo elemento da lista
+        while (point->nextElemento != lista->current){
+            point = point->nextElemento;
+        }
+    }
+    return point;
+}
+
+
+bool Lista_removeCorrente(TLista *lista){
+    TElementoLista *item,*anterior, *proximo;
+   
+    if(lista->nElementos == 0){
         return false;
     }
     else{
-        // Caso Fila
-        if(Fila_isEmpty(fila)==false){
-            // copia o dado para a Fila
-            memcpy(data,fila->first, fila->sizeElement);
-            // incremento o ponteiro do ultimo
-            if (fila->size > 0){
-                // Incrementa ponteiro
-                fila->first += fila->sizeElement;
-                // checa se nao deve circular o ponteiro
-                if(fila->first>= fila->buffer + fila->maxElement*fila->sizeElement)
-                   fila->first = fila->buffer;
-               
-                // increnta o numero de elementos na fila
-                fila->size--;
-                return true;
+        if (lista->nElementos == 1){
+            item = lista->first;
+            // liberei area e memoria alocada para os dados
+            free(item->data);
+            // atribui NULL o ponteiro do proximo, mas nao seria necessário
+            item->nextElemento = NULL;
+
+            // atribui ao ponteiro do prev o valor nulo
+            if(lista->isDoubleChain==true){
+                item->prevElemento = NULL;
+            }
+            // liberei a area do item de lista                
+            free(item);
+            lista->first   = NULL;
+            lista->last    = NULL;
+            lista->current = NULL;
+            lista->nElementos--;
+        }
+        else{
+            // caso n > 1;
+            // libera a area de dados do ultimo elemento
+            free(lista->current->data);
+            if(lista->isDoubleChain==true){
+                anterior = lista->current->prevElemento;
             }
             else{
-                return false;
+                anterior = Lista_getAnterior(lista);
             }
+            proximo = lista->current->nextElemento;
+            // atribui ao elemento next do anterior apontar para o elemento proximo
+            // caso que corrente e o ultimo
+            if(lista->current == lista->last){
+                anterior->nextElemento = lista->isCircular ? proximo: NULL;
+                lista->last = anterior;
+            }
+            // caso que o corrente e  primeiro
+            if(lista->current == lista->first){
+                if ( anterior != NULL){
+                    anterior->nextElemento = lista->isCircular ? proximo: NULL;
+                }
+                else{
+                    if (proximo != NULL){
+                        proximo->prevElemento = NULL;
+                    }
+                }
+                lista->first = proximo;
+            }
+            else{
+                // caso geral
+                anterior->nextElemento = proximo;
+            }
+            // libera a area do ultimo item
+            if(lista->isDoubleChain){
+                proximo->prevElemento = anterior;
+            }
+           
+            free(lista->current);
+            // faz o ultimo e o corrente serem o penultimo
+            lista->current = anterior;
+            // decrementa o numero de elementos da lista
+            lista->nElementos--;
         }
+    }
+    return true;
+   
+}
+
+bool Lista_removeUltimo(TLista *lista){
+    TElementoLista *item,*penultimo;
+   
+    if(lista->nElementos == 0){
         return false;
     }
-}
-bool Fila_isEmpty(TFila *fila){
-    if(fila->size == 0)
-        return true;
-    return false;
-}
-bool Fila_isFull(TFila *fila){
-    if(fila->size == fila->maxElement){
-        return true;
-    }
-    return false;
-}
+    else{
+        if (lista->nElementos == 1){
+            item = lista->first;
+            // liberei area e memoria alocada para os dados
+            free(item->data);
+            // atribui NULL o ponteiro do proximo, mas nao seria necessário
+            item->nextElemento = NULL;
 
-int Fila_size(TFila *fila){
-    return fila->size;
-}
-
-void Fila_dump(TFila *fila){
-    char *current,*j;
-    int i;
-    printf("*************************\n");
-    printf("buffer = %04x\n", fila->buffer);
-    printf("SizeElem = %d\n",fila->sizeElement);
-    printf("Size     = %d\n",fila->size);
-    printf("Max      = %d\n",fila->maxElement);
-    printf("first  = %04x\n",fila->first);
-    printf("Last   = %04x\n",fila->last);
-    printf("-----------------------\n");
-    current = fila->first;
-    for( i =0; i< fila->size;i++){
-        printf("Elemento [%d]\n",i);
-        for(j=current; j < current + fila->sizeElement;j++){
-            printf("%04x : %02x\n",j,(*j));
+            // atribui ao ponteiro do prev o valor nulo
+            if(lista->isDoubleChain==true){
+                item->prevElemento = NULL;
+            }
+            // liberei a area do item de lista                
+            free(item);
+            lista->first   = NULL;
+            lista->last    = NULL;
+            lista->current = NULL;
+            lista->nElementos--;
         }
-        current += fila->sizeElement;
-        if(current>= fila->buffer + fila->maxElement*fila->sizeElement)
-           current = fila->buffer;
-        printf("-----------------------\n");
+        else{
+            // caso n > 1;
+            // libera a area de dados do ultimo elemento
+            free(lista->last->data);
+            if(lista->isDoubleChain==true){
+                penultimo = lista->last->prevElemento;
+            }
+            else{
+                penultimo = Lista_getPenultimo(lista);
+            }
+            // coloca o elemento como ultimo, isto é, o proximo é nulo
+            penultimo->nextElemento = lista->isCircular ? lista->first: NULL;
+            // libera a area do ultimo item
+            if(lista->isDoubleChain){
+                lista->first->prevElemento = penultimo;
+            }
+            free(lista->last);
+            // faz o ultimo e o corrente serem o penultimo
+            lista->last = penultimo;
+            lista->current = penultimo;
+            // decrementa o numero de elementos da lista
+            lista->nElementos--;
+        }
+    }
+    return true;
+   
+}
+
+void Lista_goFirst(TLista *lista){
+    if(lista->first != NULL){
+        lista->current = lista->first;  
     }
 }
 
-int main(){
+void Lista_goLast(TLista *lista){
+   if(lista->last != NULL){
+        lista->current = lista->last;  
+   }
+}
+
+
+TElementoLista *List_getCurrentItem(TLista *lista){
+    return lista->current;
+}
+
+void mostra_ElementosLista(TLista *lista, int numero){
+    int i, elemento;
+    TElementoLista *item;
+    if(lista->nElementos > 0){
+        // Vou para o primeiro elemento
+        Lista_goFirst(lista);
+        // Vou executar numero de next na lista
+        for(i=0; i< numero; i++){
+            // pega o elemento corrente
+            item = List_getCurrentItem(lista);
+            // copiando o conteudo de dado do item para  variavel elemento
+            if (item != NULL){
+                memcpy(&elemento,item->data, sizeof(int));
+            }
+            printf("lista[%d] = %d\n",i,elemento);
+            Lista_next(lista);
+        }
+    }
+    else{
+        printf("Lista vazia!\n");
+    }
+}
+void mostra_ElementosPrevLista(TLista *lista, int numero){
+    int i, elemento;
+    TElementoLista *item;
+    if((lista->nElementos > 0)&&(lista->isDoubleChain ==true)){
+        // Vou para o ultimo elemento
+        Lista_goLast(lista);
+        // Vou executar numero de next na lista
+        for(i=0; i< numero; i++){
+            // pega o elemento corrente
+            item = List_getCurrentItem(lista);
+            // copiando o conteudo de dado do item para  variavel elemento
+            if (item != NULL){
+                memcpy(&elemento,item->data, sizeof(int));
+            }
+            printf("lista[%d] = %d\n",i,elemento);
+            Lista_prev(lista);
+        }
+    }
+    else{
+        printf("Lista vazia ou lista nao é circular!\n");
+    }
+}
+
+typedef struct{
+    char descricao[50];
+    float valor;
+    char tipo;
+}Operacao;
+
+void mostrar_operacao_atual(TLista *lista) {
+    Operacao op;
+    if (lista->current != NULL) {
+        memcpy(&op, lista->current->data, sizeof(Operacao));
+        printf("Operaçao atual:\n");
+        printf("Tipo: %c\n", op.tipo);
+        printf("Valor: %.2f\n", op.valor);
+        printf("Descricao(Ex:pagar de luz): %s\n", op.descricao);
+    } else {
+        printf("Nenhuma operacao registrada.\n");
+    }
+}
+
+int main() {
+    TLista lista;
+    Lista_cria(&lista, sizeof(Operacao), false, true);
+
+    int opcao;
+    do {
+        printf("\n---- Menu Conta Corrente ----\n");
+        printf("1 - Inserir operacao\n");
+        printf("2 - Avancar (proxima)\n");
+        printf("3 - Voltar (anterior)\n");
+        printf("4 - Mostrar operacao atual\n");
+        printf("5 - Mostrar histórico completo\n");
+        printf("6 - Sair\n");
+        printf("Escolha: ");
+        scanf("%d", &opcao);
+        getchar(); // limpar o buffer
+
+        if (opcao == 1) {
+            Operacao op;
+            printf("Informe tipo (D/S) para Deposito/Saque: ");
+            scanf("%c", &op.tipo);
+            getchar(); // limpar o buffer
+            printf("Informe o valor: ");
+            scanf("%f", &op.valor);
+            getchar();
+            printf("Descricao: ");
+            fgets(op.descricao, sizeof(op.descricao), stdin);
+            op.descricao[strcspn(op.descricao, "\n")] = '\0'; // remover \n
+
+            Lista_inserir(&lista, (byte*)&op);
+            printf("Operacao inserida!\n");
+        } else if (opcao == 2) {
+            Lista_next(&lista);
+            mostrar_operacao_atual(&lista);
+        } else if (opcao == 3) {
+            Lista_prev(&lista);
+            mostrar_operacao_atual(&lista);
+        } else if (opcao == 4) {
+            mostrar_operacao_atual(&lista);
+        } else if (opcao == 5) {
+            TElementoLista *aux = lista.first;
+            int i = 1;
+            while (aux != NULL) {
+                Operacao op;
+                memcpy(&op, aux->data, sizeof(Operacao));
+                printf("Op %d: Tipo: %c | Valor: %.2f | Desc: %s\n", i++, op.tipo, op.valor, op.descricao);
+                aux = aux->nextElemento;
+            }
+        }
+    } while (opcao != 6);
+
+    Lista_destroi(&lista);
     return 0;
 }
+    
