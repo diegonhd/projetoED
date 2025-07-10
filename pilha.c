@@ -416,6 +416,9 @@ void mostra_ElementosPrevLista(TLista *lista, int numero){
     }
 }
 
+
+//testando
+
 typedef struct{
     char descricao[50];
     float valor;
@@ -429,7 +432,7 @@ void mostrar_operacao_atual(TLista *lista) {
         printf("Operaçao atual:\n");
         printf("Tipo: %c\n", op.tipo);
         printf("Valor: %.2f\n", op.valor);
-        printf("Descricao(Ex:pagar de luz): %s\n", op.descricao);
+        printf("Descricao da operacao: %s\n", op.descricao);
     } else {
         printf("Nenhuma operacao registrada.\n");
     }
@@ -456,16 +459,10 @@ int main() {
             Operacao op;
             printf("Informe tipo (D/S) para Deposito/Saque: ");
             scanf("%c", &op.tipo);
-            getchar(); // limpar o buffer
-            printf("Informe o valor: ");
-            scanf("%f", &op.valor);
-            getchar();
-            printf("Descricao: ");
-            fgets(op.descricao, sizeof(op.descricao), stdin);
-            op.descricao[strcspn(op.descricao, "\n")] = '\0'; // remover \n
 
-            Lista_inserir(&lista, (byte*)&op);
-            printf("Operacao inserida!\n");
+
+
+            
         } else if (opcao == 2) {
             Lista_next(&lista);
             mostrar_operacao_atual(&lista);
@@ -475,13 +472,7 @@ int main() {
         } else if (opcao == 4) {
             mostrar_operacao_atual(&lista);
         } else if (opcao == 5) {
-            TElementoLista *aux = lista.first;
-            int i = 1;
-            while (aux != NULL) {
-                Operacao op;
-                memcpy(&op, aux->data, sizeof(Operacao));
-                printf("Op %d: Tipo: %c | Valor: %.2f | Desc: %s\n", i++, op.tipo, op.valor, op.descricao);
-                aux = aux->nextElemento;
+           
             }
         }
     } while (opcao != 6);
