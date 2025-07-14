@@ -420,11 +420,37 @@ void mostra_ElementosPrevLista(TLista *lista, int numero){
 //testando
 
 typedef struct{
+    char nome[50];
+    char cpf[20];
+    char email[100];
+    char telefone[20];     
+    char endereco[150];     
+    float saldo;    
+    int numeroConta;        
+    char tipoConta[10];     
+    bool ativo;             
+    float rendimentoAcumulado;
+}Cliente;
+
+typedef struct{
     char descricao[50];
     float valor;
-    char tipo;
+    char tipo[10];
 }Operacao;
 
+void mostrar_dados_cliente(Cliente *cliente) {
+    printf("\n--- Dados do Cliente ---\n");
+    printf("Nome       : %s\n", cliente->nome);
+    printf("CPF        : %s\n", cliente->cpf);
+    printf("Email      : %s\n", cliente->email);
+    printf("Telefone   : %s\n", cliente->telefone);
+    printf("Endereco   : %s\n", cliente->endereco);
+    printf("Conta Nº   : %d\n", cliente->numeroConta);
+    printf("Tipo Conta : %s\n", cliente->tipoConta);
+    printf("Saldo      : %.2f\n", cliente->saldo);
+    printf("Ativo      : %s\n", cliente->ativo ? "Sim" : "Não");
+    printf("-------------------------\n");
+}
 void mostrar_operacao_atual(TLista *lista) {
     Operacao op;
     if (lista->current != NULL) {
@@ -451,7 +477,7 @@ void mostra_OperacoesLista(TLista *lista) {
             if (item != NULL) {
                 memcpy(&op, item->data, sizeof(Operacao));
                 printf("Operacao %d:\n", i + 1);
-                printf("  Tipo      : %c\n", op.tipo);
+                printf("  Tipo      : %s\n", op.tipo);
                 printf("  Valor     : %.2f\n", op.valor);
                 printf("  Descricao : %s\n", op.descricao);
                 printf("--------------------------\n");
@@ -468,6 +494,45 @@ void mostra_OperacoesLista(TLista *lista) {
 int main() {
     TLista lista;
     Lista_cria(&lista, sizeof(Operacao), false, true);
+    Cliente cliente;
+    
+    printf("Cadastro do cliente:\n");
+    
+    printf("Nome: ");
+    fgets(cliente.nome, sizeof(cliente.nome), stdin);
+    cliente.nome[strcspn(cliente.nome, "\n")] = 0; // remove '\n'
+    
+    printf("CPF: ");
+    fgets(cliente.cpf, sizeof(cliente.cpf), stdin);
+    cliente.cpf[strcspn(cliente.cpf, "\n")] = 0;
+    //getchar();
+    
+    printf("Email: ");
+    fgets(cliente.email, sizeof(cliente.email), stdin);
+    cliente.email[strcspn(cliente.email, "\n")] = 0;
+    //getchar();
+    
+    printf("Telefone: ");
+    fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
+    cliente.telefone[strcspn(cliente.telefone, "\n")] = 0;
+    //getchar();
+    
+    printf("Endereco: ");
+    fgets(cliente.endereco, sizeof(cliente.endereco), stdin);
+    cliente.endereco[strcspn(cliente.endereco, "\n")] = 0;
+    //getchar();
+    
+    printf("Numero da Conta: ");
+    scanf("%d", &cliente.numeroConta);
+    getchar();
+    
+    printf("Tipo da Conta (Corrente/Poupanca): ");
+    fgets(cliente.tipoConta, sizeof(cliente.tipoConta), stdin);
+    cliente.tipoConta[strcspn(cliente.tipoConta, "\n")] = 0;
+    
+    cliente.saldo = 0.0;
+    cliente.ativo = true;   
+    cliente.rendimentoAcumulado = 0.0;
 
     int opcao;
     do {
@@ -477,24 +542,61 @@ int main() {
         printf("3 - Voltar (anterior)\n");
         printf("4 - Mostrar operacao atual\n");
         printf("5 - Mostrar histórico completo\n");
-        printf("6 - Sair\n");
+        printf("6 - Mostrar Dados do cliente\n");
+        printf("7 - Sair\n");
         printf("Escolha: ");
         scanf("%d", &opcao);
         getchar(); // limpar o buffer
 
         if (opcao == 1) {
             Operacao op;
-            printf("Informe tipo (D/S) para Deposito/Saque: ");
-            scanf("%c", &op.tipo);
-              getchar(); // Limpa o '\n'
-
+            printf("Informe tipo de operação Deposito/Saque: ");
+            fgets(op.tipo, sizeof(op.tipo), stdin);
+            op.tipo[strcspn(op.tipo, "\n")] = '\0';
+            
+            if(strcmp(op.tipo, "Deposito") == 0 || strcmp(op.tipo, "deposito") == 0){
             printf("Informe o valor da operacao: ");
             scanf("%f", &op.valor);
-            getchar(); // Limpa o '\n'
-
+            getchar(); 
+            cliente.saldo += op.valor;
+            
+                if (strcmp(cliente.tipoConta, "Poupanca") == 0 || strcmp(cliente.tipoConta, "poupanca") == 0) {
+                    float rendimento = cliente.saldo * 0.005;
+                    cliente.rendimentoAcumulado += rendimento;
+                    printf("Rendimento previsto acumulado: R$ %.2f\n", cliente.rendimentoAcumulado);
+                }
+                }
+            
+            
+            else if(strcmp(op.tipo, "Saque") == 0 || strcmp(op.tipo, "saque") == 0){
+            printf("Informe o valor da operacao: ");
+            scanf("%f", &op.valor);
+            getchar(); 
+            
+                if(cliente.saldo >= op.valor){
+                    cliente.saldo -= op.valor;
+                
+                    if (strcmp(cliente.tipoConta, "Poupanca") == 0 || strcmp(cliente.tipoConta, "poupanca") == 0) {
+                        printf("⚠️ Saque efetuado em conta poupança!\n");
+                        printf("❌ Rendimento de R$ %.2f perdido por retirada antecipada.\n", cliente.rendimentoAcumulado);
+                        cliente.rendimentoAcumulado = 0.0; // zera rendimento acumulado
+                        }
+                }
+                
+                
+                else{
+                    printf("Saldo insuficiente, operação cancelada!\n");
+                    continue;
+                }
+            }
+            
+            else{
+                printf("Tipo de operação invalida, escrave de forma correta\n");
+                continue;
+            }
+            
             printf("Informe a descricao da operacao: ");
             fgets(op.descricao, sizeof(op.descricao), stdin);
-            // Remove o '\n' se presente
             size_t len = strlen(op.descricao);
             if (len > 0 && op.descricao[len - 1] == '\n') {
                 op.descricao[len - 1] = '\0';
@@ -519,12 +621,16 @@ int main() {
         else if (opcao == 5) {
             mostra_OperacoesLista(&lista);
             }
+        else if(opcao == 6){
+            mostrar_dados_cliente(&cliente);
+        }
         
     }
-    while (opcao != 6);
+    while (opcao != 7);
 
     Lista_destroi(&lista);
     return 0;
 }
     
+
 
