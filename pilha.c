@@ -438,6 +438,33 @@ void mostrar_operacao_atual(TLista *lista) {
     }
 }
 
+void mostra_OperacoesLista(TLista *lista) {
+    int i = 0;
+    TElementoLista *item;
+    Operacao op;
+
+    if(lista->nElementos > 0){
+        Lista_goFirst(lista);
+
+        do {
+            item = List_getCurrentItem(lista);
+            if (item != NULL) {
+                memcpy(&op, item->data, sizeof(Operacao));
+                printf("Operacao %d:\n", i + 1);
+                printf("  Tipo      : %c\n", op.tipo);
+                printf("  Valor     : %.2f\n", op.valor);
+                printf("  Descricao : %s\n", op.descricao);
+                printf("--------------------------\n");
+            }
+            Lista_next(lista);
+            i++;
+        } while(i < lista->nElementos);
+    } else {
+        printf("Lista vazia!\n");
+    }
+}
+
+
 int main() {
     TLista lista;
     Lista_cria(&lista, sizeof(Operacao), false, true);
@@ -459,25 +486,45 @@ int main() {
             Operacao op;
             printf("Informe tipo (D/S) para Deposito/Saque: ");
             scanf("%c", &op.tipo);
+              getchar(); // Limpa o '\n'
 
+            printf("Informe o valor da operacao: ");
+            scanf("%f", &op.valor);
+            getchar(); // Limpa o '\n'
 
-
-            
-        } else if (opcao == 2) {
+            printf("Informe a descricao da operacao: ");
+            fgets(op.descricao, sizeof(op.descricao), stdin);
+            // Remove o '\n' se presente
+            size_t len = strlen(op.descricao);
+            if (len > 0 && op.descricao[len - 1] == '\n') {
+                op.descricao[len - 1] = '\0';
+            }
+            // Inserir na lista
+            if (Lista_inserir(&lista, (byte *)&op)) {
+                printf("Operacao inserida com sucesso!\n");
+            } else {
+                printf("Erro ao inserir operacao!\n");}
+        } 
+        else if (opcao == 2) {
             Lista_next(&lista);
             mostrar_operacao_atual(&lista);
-        } else if (opcao == 3) {
+        } 
+        else if (opcao == 3) {
             Lista_prev(&lista);
             mostrar_operacao_atual(&lista);
-        } else if (opcao == 4) {
+        } 
+        else if (opcao == 4) {
             mostrar_operacao_atual(&lista);
-        } else if (opcao == 5) {
-           
+        } 
+        else if (opcao == 5) {
+            mostra_OperacoesLista(&lista);
             }
-        }
-    } while (opcao != 6);
+        
+    }
+    while (opcao != 6);
 
     Lista_destroi(&lista);
     return 0;
 }
     
+
