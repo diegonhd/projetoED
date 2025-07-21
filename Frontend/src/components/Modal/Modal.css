@@ -14,13 +14,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
-    width: 35vw;
-    height: 75vh;
+    width: 30vw;
+    height: 70vh;
     border-radius: 20px;
     background-color: #fff;
 }
 
-.modal-container button {
+.button-close {
     position: fixed;
     top: 2%;
     right: 2%;
