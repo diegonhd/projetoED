@@ -1,0 +1,22 @@
+.operation-container {
+    display: flex;
+    justify-content: space-evenly;
+    background-color: #FFF;
+    width: 32vw;
+    height: 36vh;
+    border-radius: 20px;
+    box-shadow: 1px 1px 10px #a8a8a8;
+    z-index: 1000;
+}
+
+
+
+.btn {
+    background-color: #00A493;
+    border: 0;
+    height: 80px;
+    padding: 10px; 
+    margin: 50px 0 100px 0;
+    border-radius: 10px;
+    cursor: pointer;
+}

@@ -1,0 +1,27 @@
+.balance-container {
+    background-color: #FFF;
+    width: 32vw;
+    height: 36vh;
+    border-radius: 20px;
+    box-shadow: 1px 1px 10px #a8a8a8;
+}
+
+h2 {
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin: 20px 0 0 20px;
+}
+
+p {
+    margin: 0 0 0 20px;
+    font-weight: 500;
+    color: #6e6e6e;
+}
+
+.balance {
+    font-weight: 400;
+    font-size: 1.5rem;
+    margin: 30px 0 100px 0;
+    text-align: center;
+    color: #000;
+}
