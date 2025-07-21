@@ -9,11 +9,11 @@
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    background-color: #DDF9DD;
+    background-color: #ddf9ddb4;
     border-radius: 20px;
 }
 
-.info-container div {
+.info-container > div {
     display: flex;
     flex-direction: column;
     gap: 20px;
