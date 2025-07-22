@@ -4,7 +4,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    z-index: 10;
+    z-index: 100;
     background-color: #25252550;
 }
 
@@ -13,11 +13,12 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
+    z-index: 1000;
     width: 30vw;
     height: 70vh;
     border-radius: 20px;
-    background-color: #fff;
+    background-color: #ffffff;
+    box-shadow: 1px 1px 10px #4b4b4b;
 }
 
 .button-close {
@@ -27,4 +28,15 @@
     border: none;
     background-color: #fff;
     cursor: pointer;
+}
+
+@keyframes openmoddal {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -20px, -5px);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }

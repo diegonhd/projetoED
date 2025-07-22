@@ -13,6 +13,7 @@
 }
 
 .header-container img {
-    height: 24px;
+    height: 35px;
     padding: 50px;
+    border-radius: 50%;
 }
