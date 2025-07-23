@@ -19,6 +19,7 @@ typedef struct tagLista {
     TElementoLista *first;// ponteiro para o primeiro elemento da lista
     TElementoLista *last;// ponteiro para ultimo elemento da lista
     TElementoLista *current;// ponteiro para ultimo elemento da lista
+    float saldo;
 } TLista;
 
 // metodos de acesso do objeto lista
@@ -87,111 +88,110 @@ byte *Lista_last(TLista *lista){
     return lista->last->data;
 }
 
-bool Lista_inserir(TLista *lista, byte *data){
-    TElementoLista *item;
-    if(data !=NULL){
-        // testa se é o primeiro elemento
-        if(lista->nElementos == 0){
-            // aloca area para o elemento da lista
-            if( (item = malloc(sizeof(TElementoLista)))!= NULL){
-                // aloca area para o dado
-                if((item->data = malloc(lista->sizeElemento))!=NULL){
-                    // copia o dado
-                    memcpy(item->data,data, lista->sizeElemento);
-                    // seta NULL para o proximo elemento pois a lista tem um so elemento no caso de lista simples
-                    // e o proprio elemento no caso de lista circular
-                    item->nextElemento = lista->isCircular ? item:NULL;
-                    if (lista->isDoubleChain){
-                        // seta NULL para o proximo elemento pois a lista tem um so elemento
-                        item->prevElemento = lista->isCircular ? item:NULL;
-                    }
-                    else{
-                        item->prevElemento = NULL;
-                    }
-                    // atualiza os ponteiros da lista
-                    lista->first = item;
-                    lista->current = item;
-                    lista->last = item;
-                    lista->nElementos++;
-                }
-            }
-        }
-        else{
-            // aloca area para o elemento da lista
-            if( (item = malloc(sizeof(TElementoLista)))!= NULL){
-                // atualiza o ponteiro do proximo elemento do ultimo anterior para ser novo elemento
-                lista->last->nextElemento = item;
-                if(lista->nElementos == 1){
-                    lista->first->nextElemento = item;
-                    if (lista->isDoubleChain == true){
-                        lista->first->prevElemento = lista->isCircular ? item:NULL;
-                    }
-                    else{
-                        lista->first->prevElemento = NULL;
-                    }
-                }
-                else {
-                    lista->current->nextElemento = item;
-                }
-                // aloca area para o dado
-                if((item->data = malloc(lista->sizeElemento))!=NULL){
-                    // copia o dado
-                    memcpy(item->data,data, lista->sizeElemento);
-                    // seta NULL para o proximo elemento pois a lista tem um so elemento
-                    item->nextElemento = lista->isCircular ? lista->first:NULL;
-                    if (lista->isDoubleChain){
-                        // seta NULL para o elemento anterior pois a lista tem um so elemento
-                        item->prevElemento = lista->current;
-                        lista->first->prevElemento = lista->isCircular?item:NULL;
-                    }
-                    else{
-                        item->prevElemento = NULL;
-                    }
-                    // atualiza os ponteiros da lista
-                    lista->current = item;
-                    lista->last = item;
-                    lista->nElementos++;
-                }
-            }
-        }
+// bool Lista_inserir(TLista *lista, byte *data){
+//     TElementoLista *item;
+//     if(data !=NULL){
+//         // testa se é o primeiro elemento
+//         if(lista->nElementos == 0){
+//             // aloca area para o elemento da lista
+//             if( (item = malloc(sizeof(TElementoLista)))!= NULL){
+//                 // aloca area para o dado
+//                 if((item->data = malloc(lista->sizeElemento))!=NULL){
+//                     // copia o dado
+//                     memcpy(item->data,data, lista->sizeElemento);
+//                     // seta NULL para o proximo elemento pois a lista tem um so elemento no caso de lista simples
+//                     // e o proprio elemento no caso de lista circular
+//                     item->nextElemento = lista->isCircular ? item:NULL;
+//                     if (lista->isDoubleChain){
+//                         // seta NULL para o proximo elemento pois a lista tem um so elemento
+//                         item->prevElemento = lista->isCircular ? item:NULL;
+//                     }
+//                     else{
+//                         item->prevElemento = NULL;
+//                     }
+//                     // atualiza os ponteiros da lista
+//                     lista->first = item;
+//                     lista->current = item;
+//                     lista->last = item;
+//                     lista->nElementos++;
+//                 }
+//             }
+//         }
+//         else{
+//             // aloca area para o elemento da lista
+//             if( (item = malloc(sizeof(TElementoLista)))!= NULL){
+//                 // atualiza o ponteiro do proximo elemento do ultimo anterior para ser novo elemento
+//                 lista->last->nextElemento = item;
+//                 if(lista->nElementos == 1){
+//                     lista->first->nextElemento = item;
+//                     if (lista->isDoubleChain == true){
+//                         lista->first->prevElemento = lista->isCircular ? item:NULL;
+//                     }
+//                     else{
+//                         lista->first->prevElemento = NULL;
+//                     }
+//                 }
+//                 else {
+//                     lista->current->nextElemento = item;
+//                 }
+//                 // aloca area para o dado
+//                 if((item->data = malloc(lista->sizeElemento))!=NULL){
+//                     // copia o dado
+//                     memcpy(item->data,data, lista->sizeElemento);
+//                     // seta NULL para o proximo elemento pois a lista tem um so elemento
+//                     item->nextElemento = lista->isCircular ? lista->first:NULL;
+//                     if (lista->isDoubleChain){
+//                         // seta NULL para o elemento anterior pois a lista tem um so elemento
+//                         item->prevElemento = lista->current;
+//                         lista->first->prevElemento = lista->isCircular?item:NULL;
+//                     }
+//                     else{
+//                         item->prevElemento = NULL;
+//                     }
+//                     // atualiza os ponteiros da lista
+//                     lista->current = item;
+//                     lista->last = item;
+//                     lista->nElementos++;
+//                 }
+//             }
+//         }
        
        
+//     }
+// }
+
+bool Lista_inserir(TLista *lista, byte *data) {
+    // Cria novo elemento
+    TElementoLista *novo = malloc(sizeof(TElementoLista));
+    if (!novo) return false;
+
+    novo->data = malloc(lista->sizeElemento);
+    if (!novo->data) {
+        free(novo);
+        return false;
     }
-}
-void TElementoLista_dump(TElementoLista *element, int size){
-    int i;
-    byte *point;
-    printf ("data = %x\n", element->data);
-    printf ("next = %x\n",element->nextElemento);
-    printf ("prev = %x\n",element->prevElemento);
-    printf("Conteudo data\n");
-    point = (byte*)(element->data);
-    for (i = 0; i< size;i++){
-        printf("%04x : %02x : %03d : %c \n",point, (*point), (*point), (*point));
-        point++;
+
+    memcpy(novo->data, data, lista->sizeElemento);
+    novo->nextElemento = NULL;
+    novo->prevElemento = NULL;
+
+    // Inserção na lista
+    if (lista->nElementos == 0) {
+        lista->first = novo;
+        lista->last = novo;
+        lista->current = novo;
+    } else {
+        lista->last->nextElemento = novo;
+        if (lista->isDoubleChain)
+            novo->prevElemento = lista->last;
+        lista->last = novo;
+
+        if (lista->isCircular)
+            lista->last->nextElemento = lista->first;
     }
-}
-void Lista_dumpParam(TLista *lista){
-    TElementoLista *item;
-    int i;
-   
-    printf("n.elementos      = %d\n",lista->nElementos); // numero de elementos da lista
-    printf("Tamanho elem     = %d\n",lista->sizeElemento);// tamanho do elemento da lista
-    printf("Ponteiro first   = %x\n", lista->first);// ponteiro para o primeiro elemento da lista
-    printf("Ponteiro last    = %x\n",lista->last);// ponteiro para ultimo elemento da lista
-    printf("Ponteiro current = %x\n",lista->current);// ponteiro para ultimo elemento da lista
-    if(lista->first != NULL){
-        item = lista->first;
-        i = 0;
-        do{
-            TElementoLista_dump(item,lista->sizeElemento);
-            item = item->nextElemento;
-            i++;
-        }
-        while(i <lista->nElementos);
-    }
-    printf("-----------------------------------\n");
-   
+
+    lista->nElementos++;
+    return true;
 }
 
 TElementoLista *Lista_getPenultimo(TLista *lista){
@@ -417,164 +417,268 @@ void mostra_ElementosPrevLista(TLista *lista, int numero){
 }
 
 
-//testando
 
 
-typedef struct{
-    char descricao[50];
+// Código adaptado para facilitar a transição e integração com Python.
+
+typedef struct {
     float valor;
     char tipo[10];
-}Operacao;
+} Operacao;
+typedef unsigned char byte;
 
+int realizar_deposito(TLista *lista, float valor);
+int realizar_saque(TLista *lista, float valor);
+float get_saldo();
+Operacao* get_operacao_atual(TLista *lista);
+int navegar_proximo(TLista *lista); // retorna 0 sucesso, -1 se não avançar
+int navegar_anterior(TLista *lista);
+int get_operacoes(TLista *lista, Operacao* buffer, int max);
 
-void mostrar_operacao_atual(TLista *lista) {
+// Insere um depósito, retorna 0 sucesso, -1 erro (valor inválido)
+int realizar_deposito(TLista *lista, float valor) {
+    if (valor <= 0) return -1;
+
     Operacao op;
-    if (lista->current != NULL) {
-        memcpy(&op, lista->current->data, sizeof(Operacao));
-        printf("Operaçao atual:\n");
-        printf("Tipo: %c\n", op.tipo);
-        printf("Valor: %.2f\n", op.valor);
-        printf("Descricao da operacao: %s\n", op.descricao);
-    } else {
-        printf("Nenhuma operacao registrada.\n");
-    }
-}
-
-void mostra_OperacoesLista(TLista *lista) {
-    int i = 0;
-    TElementoLista *item;
-    Operacao op;
-
-    if(lista->nElementos > 0){
-        Lista_goFirst(lista);
-
-        do {
-            item = List_getCurrentItem(lista);
-            if (item != NULL) {
-                memcpy(&op, item->data, sizeof(Operacao));
-                printf("Operacao %d:\n", i + 1);
-                printf("  Tipo      : %s\n", op.tipo);
-                printf("  Valor     : %.2f\n", op.valor);
-                printf("  Descricao : %s\n", op.descricao);
-                printf("--------------------------\n");
-            }
-            Lista_next(lista);
-            i++;
-        } while(i < lista->nElementos);
-    } else {
-        printf("Lista vazia!\n");
-    }
-}
-
-
-float saldo = 0.0;
-
-void realizar_deposito(TLista *lista) {
-    Operacao op;
-    printf("Digite a descricao do deposito: ");
-    fgets(op.descricao, sizeof(op.descricao), stdin);
-    op.descricao[strcspn(op.descricao, "\n")] = '\0';
-    
-    printf("Digite o valor a depositar: ");
-    scanf("%f", &op.valor);
-    getchar(); // limpar buffer
-
-    if (op.valor <= 0) {
-        printf("Valor invalido.\n");
-        return;
-    }
-
-    saldo += op.valor;
+    op.valor = valor;
     strcpy(op.tipo, "DEPOSITO");
-    Lista_inserir(lista, (byte *)&op);
-    printf("Deposito realizado com sucesso. Saldo atual: R$ %.2f\n", saldo);
-}
 
+    lista->saldo += valor;
 
-void realizar_saque(TLista *lista) {
-    Operacao op;
-    printf("Digite a descricao do saque: ");
-    fgets(op.descricao, sizeof(op.descricao), stdin);
-    op.descricao[strcspn(op.descricao, "\n")] = '\0';
-
-    printf("Digite o valor a sacar: ");
-    scanf("%f", &op.valor);
-    getchar(); // limpar buffer
-
-    if (op.valor <= 0 || op.valor > saldo) {
-        printf("Saque invalido. Saldo atual: R$ %.2f\n", saldo);
-        return;
+    if (!Lista_inserir(lista, (byte*)&op)) {
+        lista->saldo -= valor; // desfazer saldo
+        return -1;
     }
 
-    saldo -= op.valor;
+    lista->current = lista->last;
+
+    return 0;
+}
+
+// Insere um saque, valida saldo e retorna 0 sucesso, -1 erro
+int realizar_saque(TLista *lista, float valor) {
+    if (valor <= 0 || valor > lista->saldo) return -1;
+
+    Operacao op;
+    op.valor = valor;
     strcpy(op.tipo, "SAQUE");
-    Lista_inserir(lista, (byte *)&op);
-    printf("Saque realizado com sucesso. Saldo atual: R$ %.2f\n", saldo);
+
+    lista->saldo -= valor;
+
+    if (!Lista_inserir(lista, (byte*)&op)) {
+        lista->saldo += valor;
+        return -1;
+    }
+
+    lista->current = lista->last;
+
+    return 0;
 }
 
-void mostrar_saldo() {
-    printf("Saldo atual: R$ %.2f\n", saldo);
+float get_saldo(TLista *lista) {
+    return lista->saldo;
 }
 
+// Retorna ponteiro para operação atual ou NULL
+Operacao* get_operacao_atual(TLista *lista) {
+    if (lista->current == NULL) return NULL;
+    return (Operacao*)lista->current->data;
+}
+
+// Avança a posição atual, retorna 0 sucesso, -1 se já no fim
+int navegar_proximo(TLista *lista) {
+    if (lista->current == NULL || lista->current->nextElemento == NULL) return -1;
+    lista->current = lista->current->nextElemento;
+    return 0;
+}
+
+// Volta a posição atual, retorna 0 sucesso, -1 se já no início
+int navegar_anterior(TLista *lista) {
+    if (!lista->isDoubleChain) return -1; // não dá para voltar
+    if (lista->current == NULL || lista->current->prevElemento == NULL) return -1;
+    lista->current = lista->current->prevElemento;
+    return 0;
+}
+
+// Preenche um array externo com até max operações, retorna quantas copiou
+int get_operacoes(TLista *lista, Operacao* buffer, int max) {
+    if (lista->nElementos == 0) return 0;
+
+    int count = 0;
+    TElementoLista *item = lista->first;
+    while (item != NULL && count < max) {
+        memcpy(&buffer[count], item->data, sizeof(Operacao));
+        count++;
+        item = item->nextElemento;
+        if (item == lista->first) break; // se circular
+    }
+    return count;
+}
+
+
+
+//APAGAR PRA VERSÃO FINAL
+//Funções pra testar o codigo em c
+
+// void teste_deposito(TLista *lista, float valor) {
+//     int res = realizar_deposito(lista, valor);
+//     if (res == 0) {
+//         printf("Depósito de R$ %.2f realizado com sucesso. Saldo atual: R$ %.2f\n", valor, get_saldo(lista));
+//     } else {
+//         printf("Falha ao realizar depósito de R$ %.2f\n", valor);
+//     }
+// }
+
+// void teste_saque(TLista *lista, float valor) {
+//     int res = realizar_saque(lista, valor);
+//     if (res == 0) {
+//         printf("Saque de R$ %.2f realizado com sucesso. Saldo atual: R$ %.2f\n", valor, get_saldo(lista));
+//     } else {
+//         printf("Falha ao realizar saque de R$ %.2f. Saldo atual: R$ %.2f\n", valor, get_saldo(lista));
+//     }
+// }
+
+// void mostrar_operacao(Operacao *op, int indice) {
+//     if (op != NULL) {
+//         printf("Operação %d: Tipo: %s, Valor: R$ %.2f\n", indice, op->tipo, op->valor);
+//     } else {
+//         printf("Operação %d: Nenhuma operação.\n", indice);
+//     }
+// }
+
+// void teste_navegacao(TLista *lista) {
+//     printf("Navegando pelas operações:\n");
+//     if (lista->nElementos == 0) {
+//         printf("Lista vazia.\n");
+//         return;
+//     }
+//     // Vai para o primeiro
+//     Lista_goFirst(lista);
+//     int idx = 1;
+//     do {
+//         Operacao *op = get_operacao_atual(lista);
+//         mostrar_operacao(op, idx++);
+//     } while(navegar_proximo(lista) == 0);
+// }
+
+// void teste_listar_todas_operacoes(TLista *lista) {
+//     Operacao buffer[100];
+//     int n = get_operacoes(lista, buffer, 100);
+//     printf("Total de operações: %d\n", n);
+//     for (int i = 0; i < n; i++) {
+//         printf("Operação %d: Tipo: %s, Valor: R$ %.2f\n", i + 1, buffer[i].tipo, buffer[i].valor);
+//     }
+// }
+
+// void menu() {
+//     printf("\n==== MENU BANCO ====\n");
+//     printf("1 - Realizar Depósito\n");
+//     printf("2 - Realizar Saque\n");
+//     printf("3 - Ver Saldo\n");
+//     printf("4 - Ver Operação Atual\n");
+//     printf("5 - Avançar Operação\n");
+//     printf("6 - Voltar Operação\n");
+//     printf("7 - Listar Todas Operações\n");
+//     printf("0 - Sair\n");
+//     printf("Escolha uma opção: ");
+// }
+
+// void interativo() {
+//     TLista lista;
+//     Lista_cria(&lista, sizeof(Operacao), false, true);
+//     lista.saldo = 0.0f;
+
+//     int opcao;
+//     float valor;
+//     Operacao buffer[100];
+
+//     do {
+//         menu();
+//         scanf("%d", &opcao);
+//         getchar(); // Limpar \n do buffer
+
+//         switch (opcao) {
+//             case 1:
+//                 printf("Valor do depósito: R$ ");
+//                 scanf("%f", &valor);
+//                 if (realizar_deposito(&lista, valor) == 0)
+//                     printf("Depósito realizado com sucesso!\n");
+//                 else
+//                     printf("Erro no depósito. Valor inválido!\n");
+//                 break;
+
+//             case 2:
+//                 printf("Valor do saque: R$ ");
+//                 scanf("%f", &valor);
+//                 if (realizar_saque(&lista, valor) == 0)
+//                     printf("Saque realizado com sucesso!\n");
+//                 else
+//                     printf("Erro no saque. Verifique o saldo ou valor!\n");
+//                 break;
+
+//             case 3:
+//                 printf("Saldo atual: R$ %.2f\n", get_saldo(&lista));
+//                 break;
+
+//             case 4: {
+//                 Operacao *op = get_operacao_atual(&lista);
+//                 if (op)
+//                     printf("Operação atual: %s de R$ %.2f\n", op->tipo, op->valor);
+//                 else
+//                     printf("Nenhuma operação atual.\n");
+//                 break;
+//             }
+
+//             case 5:
+//                 if (navegar_proximo(&lista) == 0)
+//                     printf("Avançou para a próxima operação\n");
+//                 else
+//                     printf("Não é possível avançar.\n");
+//                 break;
+
+//             case 6:
+//                 if (navegar_anterior(&lista) == 0)
+//                     printf("Voltou para a operação anterior.\n");
+//                 else
+//                     printf("Não é possível voltar.\n");
+//                 break;
+
+//             case 7: {
+//                 int n = get_operacoes(&lista, buffer, 100);
+//                 printf("Total de operações: %d\n", n);
+//                 for (int i = 0; i < n; i++) {
+//                     printf("Operação %d: %s - R$ %.2f\n", i + 1, buffer[i].tipo, buffer[i].valor);
+//                 }
+//                 break;
+//             }
+
+//             case 0:
+//                 printf("Saindo...\n");
+//                 break;
+
+//             default:
+
+//                 printf("Opção inválida. Tente novamente.\n");
+//         }
+
+//     } while (opcao != 0);
+
+//     Lista_destroi(&lista);
+// }
 
 
 int main() {
-    TLista lista;
-    Lista_cria(&lista, sizeof(Operacao), false, true);
-    
-    int opcao;
-    do {
-        printf("\n---- Menu Conta Corrente ----\n");
-        printf("1 - Depositar\n");
-        printf("2 - Sacar\n");
-        printf("3 - Mostrar saldo");
-        printf("4 - Avancar (proxima)\n");
-        printf("5 - Voltar (anterior)\n");
-        printf("6 - Mostrar operacao atual\n");
-        printf("7 - Mostrar histórico completo\n");
-        printf("8 - Sair\n");
-        printf("Escolha: ");
-        scanf("%d", &opcao);
-        getchar(); // limpar o buffer
-        
-        
-        switch(opcao){
-            case 1:
-                realizar_deposito(&lista);
-                break;
-            case 2:
-                realizar_saque(&lista);
-                break;
-            case 3:
-                mostrar_saldo();
-                break;
-            case 4:
-                Lista_next(&lista);
-                mostrar_operacao_atual(&lista);
-                break;
-            case 5:
-                (&lista);
-                mostrar_operacao_atual(&lista);
-                break;
-            case 6:
-                mostrar_operacao_atual(&lista);
-                break;
-            case 7:
-                mostra_OperacoesLista(&lista);
-                break;
-            case 8:
-                printf("Saindo...\n");
-                break;
-            default:
-                printf("Opcao invalida!\n");
-        }
-       } while (opcao != 8);
-        
-
-    Lista_destroi(&lista);
+    //APAGAR PRA VERSÃO FINAL
+    //interativo();
     return 0;
 }
+
+
+
+
     
+
+
 
 
 
