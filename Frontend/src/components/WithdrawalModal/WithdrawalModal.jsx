@@ -8,8 +8,8 @@ export default function WithdrawalModal(props) {
     return (
         <Modal isOpen={props.isOpen} setStade={props.setStade}>
             <form className="withdrawal-container">
-                <OperationInput text="R$ 0.00" label="Valor a sacar"/>
-                <OperationButton>Depositar</OperationButton>
+                <OperationInput text="R$ 0.00" label="Valor a sacar" isNumeric={true}/>
+                <OperationButton>Sacar</OperationButton>
             </form>
         </Modal>
     )

@@ -4,15 +4,15 @@
     bottom: 0;
     right: 0;
     left: 0;
-    z-index: 100;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #25252550;
 }
 
 .modal-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     z-index: 1000;
     width: 30vw;
     height: 70vh;
@@ -22,21 +22,10 @@
 }
 
 .button-close {
-    position: fixed;
+    position: absolute;
     top: 2%;
     right: 2%;
     border: none;
-    background-color: #fff;
+    background-color: transparent;
     cursor: pointer;
-}
-
-@keyframes openmoddal {
-    from {
-        opacity: 0;
-        transform: translate3d(0, -20px, -5px);
-    }
-    to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-    }
 }

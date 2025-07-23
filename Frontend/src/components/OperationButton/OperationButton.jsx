@@ -8,7 +8,7 @@ export default function OperationButton(props) {
         <div className="btn-container">
             <button 
                 className="btn" 
-                style={{backgroundColor: buttonOver ? "#28c7b7ff" : "#00A493"}}
+                style={{backgroundColor: buttonOver ? "#28c7b7ff" : "#16ad9eff"}}
                 onClick={() => props.func(true)}
                 onMouseOver={() => setButtonOver(true)}
                 onMouseOut={() => setButtonOver(false)}

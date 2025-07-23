@@ -12,6 +12,13 @@ export default function OperationInput(props) {
                 placeholder={props.text} 
                 value={props.value}
                 style={{width: props.width}}
+                onKeyDown={props.isNumeric ? (event) => {
+                    const allowed = ["Backspace", "ArrowLeft", "ArrowRight", "Tab", "Delete"]
+
+                    if (!/[0-9]/.test(event.key) && !allowed.includes(event.key)) {
+                        event.preventDefault()
+                    }
+                } : null}
             />
         </div>
     )
