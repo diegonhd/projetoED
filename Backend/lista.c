@@ -49,7 +49,7 @@ EXPORT Operation *get_currentOperation(TLista *lista);
 EXPORT Operation *get_firstOperation(TLista *lista);
 EXPORT Operation *get_lastOperation(TLista *lista);
 EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max);
-EXPORT float get_saldo();
+EXPORT float get_saldo(TLista *lista);
 
 
 
