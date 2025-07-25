@@ -12,6 +12,7 @@ export default function OperationInput(props) {
                 placeholder={props.text} 
                 value={props.value}
                 style={{width: props.width}}
+                onChange={(event) => {props.setValue(event.target.value)}}
                 onKeyDown={props.isNumeric ? (event) => {
                     const allowed = ["Backspace", "ArrowLeft", "ArrowRight", "Tab", "Delete"]
 

@@ -6,6 +6,11 @@
     box-shadow: 1px 1px 10px #a8a8a8;
 }
 
+.buttons-balance {
+    display: flex;
+    justify-content: space-evenly;
+}
+
 h2 {
     font-weight: 500;
     font-size: 1.4rem;

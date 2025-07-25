@@ -8,6 +8,7 @@ export default function Modal(props) {
             <div className="background">
                 <motion.div 
                     className="modal-container"
+                    style={{width: props.width, height: props.height}}
                     initial={{ opacity: 0, transform: "translate3d(0, -20px, -5px)"}}
                     animate={{ opacity: 1, transform: "translate3d(0, 0, 0)"}}
                     exit={{ opacity: 0, transform: "translate3d(0, -20px, -5px)"}}
