@@ -3,12 +3,18 @@
 #include <string.h>
 #include <stdlib.h>
 
-// typedef unsigned char byte;
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
 
 typedef struct {
     float value;
     char type[15];
     char date[20];
+    char instituicao[10];
+    char destino[30];
 } Operation;
 
 typedef struct tagElementoLista {
@@ -26,29 +32,30 @@ typedef struct tagLista {
     TElementoLista *current;// ponteiro para ultimo elemento da lista
 } TLista;
 
-void Lista_cria(TLista *lista);
+EXPORT void Lista_cria(TLista *lista);
 void Lista_destroi(TLista *lista);
-bool Lista_next(TLista *lista);
-bool Lista_prev(TLista *lista);
-int  Lista_getSize(TLista *lista);
+EXPORT bool Lista_next(TLista *lista);
+EXPORT bool Lista_prev(TLista *lista);
+EXPORT int  Lista_getSize(TLista *lista);
 bool Lista_inserir(TLista *lista, Operation *data);
-void Lista_goFirst(TLista *lista);
-void Lista_goLast(TLista *lista);
+EXPORT void Lista_goFirst(TLista *lista);
+EXPORT void Lista_goLast(TLista *lista);
 
 // Código adaptado para facilitar a transição e integração com Python.
-bool realizar_deposito(TLista *lista, float valor, char *date);
-bool realizar_saque(TLista *lista, float valor, char *date);
-Operation *get_currentOperation(TLista *lista);
-Operation *get_firstOperation(TLista *lista);
-Operation *get_lastOperation(TLista *lista);
-bool get_operacoes(TLista *lista, Operation *buffer, int max);
-float get_saldo();
+EXPORT bool realizar_deposito(TLista *lista, float valor, char *date);
+EXPORT bool realizar_saque(TLista *lista, float valor, char *date);
+EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino);
+EXPORT Operation *get_currentOperation(TLista *lista);
+EXPORT Operation *get_firstOperation(TLista *lista);
+EXPORT Operation *get_lastOperation(TLista *lista);
+EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max);
+EXPORT float get_saldo();
 
 
 
-void Lista_cria(TLista *lista){
+EXPORT void Lista_cria(TLista *lista){
     lista->nElementos = 0;
-    lista->sizeElemento = sizeof(TElementoLista);
+    lista->sizeElemento = sizeof(Operation);
     lista->first = NULL;// ponteiro para o primeiro elemento da lista
     lista->last  = NULL;// ponteiro para ultimo elemento da lista
     lista->current = NULL;
@@ -73,7 +80,7 @@ bool Lista_inserir(TLista *lista, Operation *data){
     TElementoLista *novo = (TElementoLista *) malloc(sizeof(TElementoLista));
     if (novo == NULL) return false;
     
-    novo->data = (Operation *) malloc(sizeof(lista->sizeElemento));
+    novo->data = (Operation *) malloc(sizeof(Operation));
     
     memcpy(novo->data, data, lista->sizeElemento);
     novo->nextElemento = NULL;
@@ -94,45 +101,49 @@ bool Lista_inserir(TLista *lista, Operation *data){
     return true;
 }
 
-bool Lista_next(TLista *lista){
+EXPORT bool Lista_next(TLista *lista){
     if (lista->current == NULL || lista->current->nextElemento == NULL) return false;
     lista->current = lista->current->nextElemento;
     return true;
 }
 
-bool Lista_prev(TLista *lista){
+EXPORT bool Lista_prev(TLista *lista){
     if (lista->current == NULL || lista->current->prevElemento == NULL) return false;
     lista->current = lista->current->prevElemento;
     return true;
 }
 
-void Lista_goFirst(TLista *lista){
+EXPORT void Lista_goFirst(TLista *lista){
     if(lista->first != NULL){
         lista->current = lista->first;  
     }
 }
 
-void Lista_goLast(TLista *lista){
+EXPORT void Lista_goLast(TLista *lista){
   if(lista->last != NULL){
         lista->current = lista->last;  
   }
 }
 
-int Lista_getSize(TLista *lista){
+EXPORT int Lista_getSize(TLista *lista){
     return lista->nElementos;
 }
 
 
 
+// Código adaptado para facilitar a transição e integração com Python.
+
 
 // Insere um depósito, retorna 0 sucesso, -1 erro (valor inválido)
-bool realizar_deposito(TLista *lista, float valor, char *date) {
+EXPORT bool realizar_deposito(TLista *lista, float valor, char *date) {
     if (valor <= 0) return false;
 
     Operation op;
     op.value = valor;
     strcpy(op.type, "DEPOSITO");
     strcpy(op.date, date);
+    strcpy(op.instituicao, "MyBank");
+    strcpy(op.destino, NULL);
 
     lista->saldo += valor;
 
@@ -147,13 +158,38 @@ bool realizar_deposito(TLista *lista, float valor, char *date) {
 }
 
 // Insere um saque, valida saldo e retorna 0 sucesso, -1 erro
-bool realizar_saque(TLista *lista, float valor, char *date) {
+EXPORT bool realizar_saque(TLista *lista, float valor, char *date) {
     if (valor <= 0 || valor > lista->saldo) return false;
 
     Operation op;
     op.value = valor;
     strcpy(op.type, "SAQUE");
     strcpy(op.date, date);
+    strcpy(op.instituicao, "MyBank");
+    strcpy(op.destino, NULL);
+
+    lista->saldo -= valor;
+
+    if (!Lista_inserir(lista, &op)) {
+        lista->saldo += valor;  // devolver saldo
+        return false;
+    }
+
+    lista->current = lista->last;
+
+    return true;
+}
+
+// Insere uma transferência, valida saldo e retorna 0 sucesso, -1 erro
+EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino) {
+    if (valor <= 0 || valor > lista->saldo) return false;
+
+    Operation op;
+    op.value = valor;
+    strcpy(op.type, "SAQUE");
+    strcpy(op.date, date);
+    strcpy(op.instituicao, "MyBank");
+    strcpy(op.destino, destino);
 
     lista->saldo -= valor;
 
@@ -168,25 +204,25 @@ bool realizar_saque(TLista *lista, float valor, char *date) {
 }
 
 // Retorna ponteiro para operação atual ou NULL
-Operation *get_currentOperation(TLista *lista) {
+EXPORT Operation *get_currentOperation(TLista *lista) {
     if (lista->current == NULL) return NULL;
     return lista->current->data;
 }
 
 // Retorna ponteiro para primeira operação ou NULL
-Operation *get_firstOperation(TLista *lista){
+EXPORT Operation *get_firstOperation(TLista *lista){
     if (lista->first == NULL) return NULL;
     return lista->first->data;
 }
 
 // Retorna ponteiro para ultima operação ou NULL
-Operation *get_lastOperation(TLista *lista){
+EXPORT Operation *get_lastOperation(TLista *lista){
     if (lista->last == NULL) return NULL;
     return lista->last->data;
 }
 
 // Preenche um array externo com até max operações, retorna quantas copiou
-bool get_operacoes(TLista *lista, Operation *buffer, int max) {
+EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max) {
     if (lista->nElementos == 0) return true;
 
     int count = 0;
@@ -200,15 +236,6 @@ bool get_operacoes(TLista *lista, Operation *buffer, int max) {
     return count;
 }
 
-float get_saldo(TLista *lista) {
+EXPORT float get_saldo(TLista *lista) {
     return lista->saldo;
-}
-
-
-
-
-int main()
-{
-
-    return 0;
 }
