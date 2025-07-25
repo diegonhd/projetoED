@@ -1,5 +1,5 @@
 import React, { Children, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import "./Modal.css"
 
 export default function Modal(props) {

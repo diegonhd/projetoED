@@ -9,7 +9,7 @@ export default function OperationButton(props) {
             <button 
                 className="btn" 
                 style={{backgroundColor: buttonOver ? "#28c7b7ff" : "#16ad9eff"}}
-                onClick={() => props.func(true)}
+                onClick={() => props.func(!props.stade)}
                 onMouseOver={() => setButtonOver(true)}
                 onMouseOut={() => setButtonOver(false)}
             >

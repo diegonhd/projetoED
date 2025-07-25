@@ -4,13 +4,15 @@
 }
 
 .info-container {
-    width: 70vw;
+    /* width: 70vw; */
     height: 80vh;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
+    gap: 20px;
     background-color: #61ffed8c;
     border-radius: 20px;
+    padding: 0 20px;
 }
 
 .info-container > div {
