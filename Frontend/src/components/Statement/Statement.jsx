@@ -15,7 +15,7 @@ export default function Statement(props) {
 
     useEffect(() => {
         fecthFiveOperations()
-    }, [])
+    }, [props.update])
 
     if (props.isOpen) {
         return (
@@ -28,11 +28,16 @@ export default function Statement(props) {
                 <h1>Extrato Bancário</h1>
                 <div className="statement-cards">
                     {operations.map((operation) => (
-                        <CardTransaction key={operation.id} value={operation.value} type={operation.type}/>
+                        <CardTransaction 
+                            key={operation.id} 
+                            setId={props.setId}
+                            id={operation.id} value={operation.value} type={operation.type}
+                            func={() => props.setOpenOperation(true)}
+                        />
                     ))}
                 </div>
                 <div className="operation-btn">
-                    <OperationButton>Detalhes</OperationButton>
+                    <OperationButton func={() => {props.setOpenDetails(true)}}>Detalhes</OperationButton>
                 </div>
             </motion.section>
         )

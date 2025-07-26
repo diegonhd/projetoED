@@ -6,6 +6,10 @@ export default function CardTransaction(props) {
         <div 
             className="card-container"
             style={{backgroundColor: props.type == "DEPOSITO" ? "#E6F6E6" : "#f6e6e6"}}
+            onClick={() => {
+                props.setId(props.id)
+                props.func()
+            }}
         >
             <p className="value">
                 {props.type == "DEPOSITO" ? "+" : "-"}R${new Intl.NumberFormat('pt-BR', {

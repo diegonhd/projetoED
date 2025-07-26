@@ -108,7 +108,7 @@ port = 3000
 
 CORS(app)
 
-@app.route("/operation", methods=["GET"])
+@app.route("/operation/all", methods=["GET"])
 def get_allOperations():
     jsontexto = lib.get_allOperations(byref(lista)).decode()
     jsontexto = json.loads(jsontexto)
@@ -138,6 +138,11 @@ def get_operationById(id):
         lib.Lista_next(byref(lista))
     
     return jsonify({"erro": "Operação não encontrada"}), 404
+
+@app.route("/operation/saldo", methods=["GET"])
+def get_saldo():
+    saldo = lib.get_saldo(byref(lista))
+    return jsonify({"saldo": saldo})
 
 @app.route("/operation/deposit", methods=["POST"])
 def create_deposit():
