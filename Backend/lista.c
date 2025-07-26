@@ -32,25 +32,25 @@ typedef struct tagLista {
     TElementoLista *current;// ponteiro para ultimo elemento da lista
 } TLista;
 
-// EXPORT void Lista_cria(TLista *lista);
-// void Lista_destroi(TLista *lista);
-// EXPORT bool Lista_next(TLista *lista);
-// EXPORT bool Lista_prev(TLista *lista);
-EXPORT int  Lista_getSize(TLista *lista);
+EXPORT void Lista_cria(TLista *lista);
+void Lista_destroi(TLista *lista);
+EXPORT bool Lista_next(TLista *lista);
+EXPORT bool Lista_prev(TLista *lista);
+EXPORT int Lista_getSize(TLista *lista);
 bool Lista_inserir(TLista *lista, Operation *data);
-// EXPORT void Lista_goFirst(TLista *lista);
-// EXPORT void Lista_goLast(TLista *lista);
+EXPORT void Lista_goFirst(TLista *lista);
+EXPORT void Lista_goLast(TLista *lista);
 
 // Código adaptado para facilitar a transição e integração com Python.
 
-// EXPORT bool realizar_deposito(TLista *lista, float valor, char *date);
-// EXPORT bool realizar_saque(TLista *lista, float valor, char *date);
-// EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino);
-// EXPORT Operation *get_currentOperation(TLista *lista);
-// EXPORT Operation *get_firstOperation(TLista *lista);
-// EXPORT Operation *get_lastOperation(TLista *lista);
-EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max);
-// EXPORT float get_saldo(TLista *lista);
+EXPORT bool realizar_deposito(TLista *lista, float valor, char *date);
+EXPORT bool realizar_saque(TLista *lista, float valor, char *date);
+EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino);
+EXPORT Operation *get_currentOperation(TLista *lista);
+EXPORT Operation *get_firstOperation(TLista *lista);
+EXPORT Operation *get_lastOperation(TLista *lista);
+EXPORT char *get_operations(TLista *lista);
+EXPORT float get_saldo(TLista *lista);
 
 
 
@@ -187,7 +187,7 @@ EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char 
 
     Operation op;
     op.value = valor;
-    strcpy(op.type, "SAQUE");
+    strcpy(op.type, "TRANSFERENCIA");
     strcpy(op.date, date);
     strcpy(op.instituicao, "MyBank");
     strcpy(op.destino, destino);
@@ -223,18 +223,36 @@ EXPORT Operation *get_lastOperation(TLista *lista){
 }
 
 // Preenche um array externo com até max operações, retorna quantas copiou
-EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max) {
-    if (lista->nElementos == 0) return true;
+EXPORT char *get_operations(TLista *lista) {
+    // Aloca um buffer grande (ajuste conforme necessário)
+    char *json = malloc(4096);
+    json[0] = '\0'; // inicializa como string vazia
 
-    int count = 0;
-    TElementoLista *item = lista->first;
-    while (item != NULL && count < max) {
-        memcpy(&buffer[count], item->data, sizeof(Operation));
-        count++;
-        item = item->nextElemento;
-        if (item == lista->first) break; // se circular
+    strcat(json, "[");
+
+    Lista_goLast(lista);
+
+    for (int i = 0; i < Lista_getSize(lista); i++) {
+        char object[512];
+        snprintf(object, sizeof(object),
+                 "{\"value\": %.2f, \"type\": \"%s\", \"date\": \"%s\", \"instituicao\": \"MyBank\", \"destino\": \"%s\"}",
+                 lista->current->data->value,
+                 lista->current->data->type,
+                 lista->current->data->date,
+                 lista->current->data->destino);
+
+        strcat(json, object);
+
+        if (i != Lista_getSize(lista) - 1)
+            strcat(json, ", ");
+
+        if (!Lista_prev(lista))
+            break;
     }
-    return count;
+
+    strcat(json, "]");
+
+    return json;
 }
 
 EXPORT float get_saldo(TLista *lista) {

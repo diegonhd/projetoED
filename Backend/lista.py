@@ -40,6 +40,10 @@ lib.Lista_next.restype = c_bool
 lib.Lista_prev.argtypes = [POINTER(TLista)]
 lib.Lista_prev.restype = c_bool
 
+# configura os tipos dos argumentos e retorno da função Lista_getSize
+lib.Lista_getSize.argtypes = [POINTER(TLista)]
+lib.Lista_getSize.restype = c_int
+
 # configura os tipos dos argumentos e retorno da função Lista_goFirst
 lib.Lista_goFirst.argtypes = [POINTER(TLista)]
 lib.Lista_goFirst.restype = None
@@ -72,27 +76,52 @@ lib.get_firstOperation.restype = POINTER(Operation)
 lib.get_lastOperation.argtypes = [POINTER(TLista)]
 lib.get_lastOperation.restype = POINTER(Operation)
 
+lib.get_operations.argtypes = [POINTER(TLista)]
+lib.get_operations.restype = c_char_p
+
 # configura os tipos dos argumentos e retorno da função get_saldo
 lib.get_saldo.argtypes = [POINTER(TLista)]
 lib.get_saldo.restype = c_float
 
 
 
+lista = TLista()
+lib.Lista_cria(byref(lista))
 
-# lista = TLista()
+lib.realizar_deposito(byref(lista), 100, b"25/07/2025")
+lib.realizar_saque(byref(lista), 45, b"25/07/2025")
+lib.realizar_transferencia(byref(lista), 34, b"25/07/2025", b"Diego")
 
-# lib.Lista_cria(byref(lista))
+# deselvolvimento da lógica do backend em si
+from flask import Flask, jsonify, request
+import json
 
-# lib.realizar_deposito(byref(lista), 100, b"25/07/2025")
-# lib.realizar_saque(byref(lista), 45, b"25/07/2025")
-# lib.realizar_transferencia(byref(lista), 34, b"25/07/2025", b"Cheila")
+app = Flask(__name__)
+port = 3000
 
-# print(lib.get_currentOperation(byref(lista)).contents.value)
+@app.route("/operation", methods=["GET"])
+def get_operations():
+    jsontexto = lib.get_operations(byref(lista)).decode()
+    jsontexto = json.loads(jsontexto)
+    return jsonify(jsontexto)
 
-# lib.Lista_goFirst(byref(lista))
+@app.route("/deposit", methods=["POST"])
+def create_deposit():
+    deposit = request.json
+    lib.realizar_deposito(byref(lista), deposit["value"], deposit["date"].encode())
+    return deposit
 
-# print(lib.get_currentOperation(byref(lista)).contents.value)
+@app.route("/withdrawal", methods=["POST"])
+def create_withdrawal():
+    withdrawal = request.json
+    lib.realizar_saque(byref(lista), withdrawal["value"], withdrawal["date"].encode())
+    return withdrawal
 
-# lib.Lista_goLast(byref(lista))
+@app.route("/transfer", methods=["POST"])
+def create_transfer():
+    transfer = request.json
+    lib.realizar_transferencia(byref(lista), transfer["value"], transfer["date"].encode(), transfer["destino"].encode())
+    return transfer
 
-# print(lib.get_currentOperation(byref(lista)).contents.value)
+
+app.run(port=port)
