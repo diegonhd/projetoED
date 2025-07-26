@@ -6,7 +6,8 @@ lib = ctypes.CDLL("./lista.dll")
 
 # define a struct Operation
 class Operation(Structure):
-    _fields_ = [("value", c_float),
+    _fields_ = [("id", c_int),
+                ("value", c_float),
                 ("type", c_char * 15),
                 ("date", c_char * 20),
                 ("instituicao", c_char * 10),
@@ -104,6 +105,25 @@ def get_operations():
     jsontexto = lib.get_operations(byref(lista)).decode()
     jsontexto = json.loads(jsontexto)
     return jsonify(jsontexto)
+
+@app.route("/operation/<int:id>", methods=["GET"])
+def get_operationById(id):
+    lib.Lista_goFirst(byref(lista))
+
+    for i in range(lib.Lista_getSize(byref(lista))):
+        atual = lib.get_currentOperation(byref(lista))
+        if atual.contents.id == id:
+            operation = {"id": atual.contents.id,
+                         "value": atual.contents.value,
+                         "type": atual.contents.type.decode(),
+                         "date": atual.contents.date.decode(),
+                         "instituicao": atual.contents.instituicao.decode(),
+                         "destino": atual.contents.destino.decode()}
+            return jsonify(operation)
+        
+        lib.Lista_next(byref(lista))
+    
+    return jsonify({"erro": "Operação não encontrada"}), 404
 
 @app.route("/deposit", methods=["POST"])
 def create_deposit():

@@ -10,6 +10,7 @@
 #endif
 
 typedef struct {
+    int id;
     float value;
     char type[15];
     char date[20];
@@ -140,6 +141,7 @@ EXPORT bool realizar_deposito(TLista *lista, float valor, char *date) {
     if (valor <= 0) return false;
 
     Operation op;
+    op.id = lista->nElementos;
     op.value = valor;
     strcpy(op.type, "DEPOSITO");
     strcpy(op.date, date);
@@ -163,6 +165,7 @@ EXPORT bool realizar_saque(TLista *lista, float valor, char *date) {
     if (valor <= 0 || valor > lista->saldo) return false;
 
     Operation op;
+    op.id = lista->nElementos;
     op.value = valor;
     strcpy(op.type, "SAQUE");
     strcpy(op.date, date);
@@ -186,6 +189,7 @@ EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char 
     if (valor <= 0 || valor > lista->saldo) return false;
 
     Operation op;
+    op.id = lista->nElementos;
     op.value = valor;
     strcpy(op.type, "TRANSFERENCIA");
     strcpy(op.date, date);
@@ -235,7 +239,8 @@ EXPORT char *get_operations(TLista *lista) {
     for (int i = 0; i < Lista_getSize(lista); i++) {
         char object[512];
         snprintf(object, sizeof(object),
-                 "{\"value\": %.2f, \"type\": \"%s\", \"date\": \"%s\", \"instituicao\": \"MyBank\", \"destino\": \"%s\"}",
+                 "{\"id\": %d, \"value\": %.2f, \"type\": \"%s\", \"date\": \"%s\", \"instituicao\": \"MyBank\", \"destino\": \"%s\"}",
+                 lista->current->data->id,
                  lista->current->data->value,
                  lista->current->data->type,
                  lista->current->data->date,
