@@ -32,24 +32,25 @@ typedef struct tagLista {
     TElementoLista *current;// ponteiro para ultimo elemento da lista
 } TLista;
 
-EXPORT void Lista_cria(TLista *lista);
-void Lista_destroi(TLista *lista);
-EXPORT bool Lista_next(TLista *lista);
-EXPORT bool Lista_prev(TLista *lista);
+// EXPORT void Lista_cria(TLista *lista);
+// void Lista_destroi(TLista *lista);
+// EXPORT bool Lista_next(TLista *lista);
+// EXPORT bool Lista_prev(TLista *lista);
 EXPORT int  Lista_getSize(TLista *lista);
 bool Lista_inserir(TLista *lista, Operation *data);
-EXPORT void Lista_goFirst(TLista *lista);
-EXPORT void Lista_goLast(TLista *lista);
+// EXPORT void Lista_goFirst(TLista *lista);
+// EXPORT void Lista_goLast(TLista *lista);
 
 // Código adaptado para facilitar a transição e integração com Python.
-EXPORT bool realizar_deposito(TLista *lista, float valor, char *date);
-EXPORT bool realizar_saque(TLista *lista, float valor, char *date);
-EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino);
-EXPORT Operation *get_currentOperation(TLista *lista);
-EXPORT Operation *get_firstOperation(TLista *lista);
-EXPORT Operation *get_lastOperation(TLista *lista);
+
+// EXPORT bool realizar_deposito(TLista *lista, float valor, char *date);
+// EXPORT bool realizar_saque(TLista *lista, float valor, char *date);
+// EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char *destino);
+// EXPORT Operation *get_currentOperation(TLista *lista);
+// EXPORT Operation *get_firstOperation(TLista *lista);
+// EXPORT Operation *get_lastOperation(TLista *lista);
 EXPORT bool get_operacoes(TLista *lista, Operation *buffer, int max);
-EXPORT float get_saldo(TLista *lista);
+// EXPORT float get_saldo(TLista *lista);
 
 
 
@@ -143,7 +144,7 @@ EXPORT bool realizar_deposito(TLista *lista, float valor, char *date) {
     strcpy(op.type, "DEPOSITO");
     strcpy(op.date, date);
     strcpy(op.instituicao, "MyBank");
-    strcpy(op.destino, NULL);
+    strcpy(op.destino, "");
 
     lista->saldo += valor;
 
@@ -166,7 +167,7 @@ EXPORT bool realizar_saque(TLista *lista, float valor, char *date) {
     strcpy(op.type, "SAQUE");
     strcpy(op.date, date);
     strcpy(op.instituicao, "MyBank");
-    strcpy(op.destino, NULL);
+    strcpy(op.destino, "");
 
     lista->saldo -= valor;
 
