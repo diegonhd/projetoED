@@ -100,10 +100,13 @@ lib.realizar_transferencia(byref(lista), 34, b"25/07/2025", b"Diego")
 
 # deselvolvimento da lógica do backend em si
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import json
 
 app = Flask(__name__)
 port = 3000
+
+CORS(app)
 
 @app.route("/operation", methods=["GET"])
 def get_allOperations():
@@ -136,19 +139,19 @@ def get_operationById(id):
     
     return jsonify({"erro": "Operação não encontrada"}), 404
 
-@app.route("/deposit", methods=["POST"])
+@app.route("/operation/deposit", methods=["POST"])
 def create_deposit():
     deposit = request.json
     lib.realizar_deposito(byref(lista), deposit["value"], deposit["date"].encode())
     return deposit
 
-@app.route("/withdrawal", methods=["POST"])
+@app.route("/operation/withdrawal", methods=["POST"])
 def create_withdrawal():
     withdrawal = request.json
     lib.realizar_saque(byref(lista), withdrawal["value"], withdrawal["date"].encode())
     return withdrawal
 
-@app.route("/transfer", methods=["POST"])
+@app.route("/operation/transfer", methods=["POST"])
 def create_transfer():
     transfer = request.json
     lib.realizar_transferencia(byref(lista), transfer["value"], transfer["date"].encode(), transfer["destino"].encode())

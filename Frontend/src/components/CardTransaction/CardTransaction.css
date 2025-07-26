@@ -1,0 +1,17 @@
+.card-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 46px;
+    width: 25vw;
+    border-radius: 10px;
+    box-shadow: 1px 1px 5px #d4d4d4;
+}
+
+.value {
+    margin-left: 20px;
+}
+
+.type {
+    margin-right: 20px;
+}
