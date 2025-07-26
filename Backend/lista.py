@@ -77,8 +77,13 @@ lib.get_firstOperation.restype = POINTER(Operation)
 lib.get_lastOperation.argtypes = [POINTER(TLista)]
 lib.get_lastOperation.restype = POINTER(Operation)
 
-lib.get_operations.argtypes = [POINTER(TLista)]
-lib.get_operations.restype = c_char_p
+# configura os tipos dos argumentos e retorno da função get_allOperations
+lib.get_allOperations.argtypes = [POINTER(TLista)]
+lib.get_allOperations.restype = c_char_p
+
+# configura os tipos dos argumentos e retorno da função get_fiveOperations
+lib.get_fiveOperations.argtypes = [POINTER(TLista)]
+lib.get_fiveOperations.restype = c_char_p
 
 # configura os tipos dos argumentos e retorno da função get_saldo
 lib.get_saldo.argtypes = [POINTER(TLista)]
@@ -101,8 +106,14 @@ app = Flask(__name__)
 port = 3000
 
 @app.route("/operation", methods=["GET"])
-def get_operations():
-    jsontexto = lib.get_operations(byref(lista)).decode()
+def get_allOperations():
+    jsontexto = lib.get_allOperations(byref(lista)).decode()
+    jsontexto = json.loads(jsontexto)
+    return jsonify(jsontexto)
+
+@app.route("/operation/lasts", methods=["GET"])
+def get_fiveOperations():
+    jsontexto = lib.get_fiveOperations(byref(lista)).decode()
     jsontexto = json.loads(jsontexto)
     return jsonify(jsontexto)
 

@@ -50,7 +50,8 @@ EXPORT bool realizar_transferencia(TLista *lista, float valor, char *date, char 
 EXPORT Operation *get_currentOperation(TLista *lista);
 EXPORT Operation *get_firstOperation(TLista *lista);
 EXPORT Operation *get_lastOperation(TLista *lista);
-EXPORT char *get_operations(TLista *lista);
+EXPORT char *get_allOperations(TLista *lista);
+EXPORT char *get_fiveOperations(TLista *lista);
 EXPORT float get_saldo(TLista *lista);
 
 
@@ -227,7 +228,7 @@ EXPORT Operation *get_lastOperation(TLista *lista){
 }
 
 // Preenche um array externo com até max operações, retorna quantas copiou
-EXPORT char *get_operations(TLista *lista) {
+EXPORT char *get_allOperations(TLista *lista) {
     // Aloca um buffer grande (ajuste conforme necessário)
     char *json = malloc(4096);
     json[0] = '\0'; // inicializa como string vazia
@@ -249,6 +250,43 @@ EXPORT char *get_operations(TLista *lista) {
         strcat(json, object);
 
         if (i != Lista_getSize(lista) - 1)
+            strcat(json, ", ");
+
+        if (!Lista_prev(lista))
+            break;
+    }
+
+    strcat(json, "]");
+
+    return json;
+}
+
+EXPORT char *get_fiveOperations(TLista *lista) {
+    // Aloca um buffer grande (ajuste se necessário)
+    char *json = malloc(2048);
+    if (!json) return NULL;
+    json[0] = '\0'; // Inicializa string vazia
+
+    strcat(json, "[");
+
+    Lista_goLast(lista);
+
+    int total = Lista_getSize(lista);
+    int limite = total < 5 ? total : 5;
+
+    for (int i = 0; i < limite; i++) {
+        char object[512];
+        snprintf(object, sizeof(object),
+                 "{\"id\": %d, \"value\": %.2f, \"type\": \"%s\", \"date\": \"%s\", \"instituicao\": \"MyBank\", \"destino\": \"%s\"}",
+                 lista->current->data->id,
+                 lista->current->data->value,
+                 lista->current->data->type,
+                 lista->current->data->date,
+                 lista->current->data->destino);
+
+        strcat(json, object);
+
+        if (i != limite - 1)
             strcat(json, ", ");
 
         if (!Lista_prev(lista))
